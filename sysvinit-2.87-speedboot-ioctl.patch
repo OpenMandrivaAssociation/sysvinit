@@ -1,0 +1,29 @@
+From 88bec56c075253dcb936648099c12e6e53166718 Mon Sep 17 00:00:00 2001
+From: Frederic Crozat <fcrozat@mandriva.com>
+Date: Wed, 5 May 2010 14:15:26 +0200
+Subject: [PATCH] do not try to take over tty for rc.sysinit
+
+This conflicts with plymouth + speedboot + rc.sysinit + Xorg competing
+for console access, causing X to take 100% cpu (Mdv bug #58488)
+---
+ src/init.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+diff --git a/src/init.c b/src/init.c
+index 8bdb45d..0acfb70 100644
+--- a/src/init.c
++++ b/src/init.c
+@@ -972,7 +972,9 @@ int spawn(CHILD *ch, int *res)
+ 			setsid();
+ 			if ((f = console_open(O_RDWR|O_NOCTTY)) >= 0) {
+ 				/* Take over controlling tty by force */
+-				(void)ioctl(f, TIOCSCTTY, 1);
++				/* do not do this for rc.sysinit, it conflicts with speedboot + plymouth + Xorg, all starting on same VT : Mdv bug #58488 */
++				if (runlevel != '#')
++					(void)ioctl(f, TIOCSCTTY, 1);
+   				dup(f);
+   				dup(f);
+ 			}
+-- 
+1.7.1
+

@@ -1,0 +1,180 @@
+--- sysvinit-2.87dsf/man/pidof.8.omit	2010-11-28 01:00:50.000000000 +0300
++++ sysvinit-2.87dsf/man/pidof.8	2010-11-28 01:00:50.000000000 +0300
+@@ -6,6 +6,7 @@ pidof -- find the process ID of a runnin
+ .RB [ \-s ]
+ .RB [ \-c ]
+ .RB [ \-x ]
++.RB [ \-m ]
+ .RB [ \-o
+ .IR omitpid ]
+ .RB [ \-o
+@@ -36,6 +37,11 @@ shells running the named scripts.
+ Tells \fIpidof\fP to omit processes with that process id. The special
+ pid \fB%PPID\fP can be used to name the parent process of the \fIpidof\fP
+ program, in other words the calling shell or shell script.
++.IP -m
++When used with -o, will also omit any processes that have the same
++argv[0] and argv[1] as any explicitly omitted process ids. This can be
++used to avoid multiple shell scripts concurrently calling pidof returning
++each other's pids.
+ .SH "EXIT STATUS"
+ .TP
+ .B 0
+--- sysvinit-2.87dsf/src/killall5.c.omit	2010-11-28 01:00:50.000000000 +0300
++++ sysvinit-2.87dsf/src/killall5.c	2010-11-28 01:02:11.000000000 +0300
+@@ -77,12 +77,16 @@ typedef struct {
+ 
+ /* List of processes. */
+ PROC *plist;
++PROC *olist;
+ 
+ /* Did we stop all processes ? */
+ int sent_sigstop;
+ 
+ int scripts_too = 0;
+ 
++/* Number of PIDs to omit */
++int oind;
++
+ char *progname;	/* the name of the running program */
+ #ifdef __GNUC__
+ __attribute__ ((format (printf, 2, 3)))
+@@ -169,7 +173,7 @@ int readarg(FILE *fp, char *buf, int sz)
+  *	Read the proc filesystem.
+  *	CWD must be /proc to avoid problems if / is affected by the killing (ie depend on fuse).
+  */
+-int readproc(int do_stat)
++int readproc(int do_stat, pid_t *opid)
+ {
+ 	DIR		*dir;
+ 	FILE		*fp;
+@@ -328,6 +332,15 @@ int readproc(int do_stat)
+ 		p->next = plist;
+ 		plist = p;
+ 		p->pid = pid;
++		/* Could be smarter, but it's a small list. */
++		if (opid)
++			for (f = 0; f < oind; f++)
++				if (opid[f] == p->pid) {
++					n = (PROC*)xmalloc(sizeof(PROC));
++					*n = *p;
++					n->next = olist;
++					olist = n;
++				}
+ 	}
+ 	closedir(dir);
+ 
+@@ -474,6 +487,26 @@ PIDQ_HEAD *pidof(char *prog)
+ 	 return q;
+ }
+ 
++int matches(PROC *o, PROC *p)
++{
++       int ret = 0;
++       char *oargv1, *pargv1;
++       if ((o->argv0 && p->argv0 && !strcmp(o->argv0,p->argv0))) {
++               if (o->argv1 && p->argv1) {
++                       if ((oargv1 = canonicalize_file_name(o->argv1)) == NULL)
++                               oargv1 = strdup(o->argv1);
++                       if ((pargv1 = canonicalize_file_name(p->argv1)) == NULL)
++                               pargv1 = strdup(p->argv1);
++                       if (! strcmp(oargv1, pargv1)) {
++                               ret = 1;
++                       }
++                       free(oargv1);
++                       free(pargv1);
++               }
++       }
++       return ret;
++}
++
+ /* Give usage message and exit. */
+ void usage(void)
+ {
+@@ -505,6 +538,7 @@ void nsyslog(int pri, char *fmt, ...)
+ 
+ #define PIDOF_SINGLE	0x01
+ #define PIDOF_OMIT	0x02
++#define PIDOF_OMIT_OMIT_MATCHES        0x08
+ 
+ #define PIDOF_OMITSZ	5
+ 
+@@ -518,16 +552,17 @@ int main_pidof(int argc, char **argv)
+ 	pid_t		opid[PIDOF_OMITSZ], spid;
+ 	int		f;
+ 	int		first = 1;
+-	int		i, oind, opt, flags = 0;
++	int		i, opt, flags = 0;
+ 	int		chroot_check = 0;
+ 	struct stat	st;
+ 	char		tmp[512];
+ 
++	olist = (PROC*)0;
+ 	for (oind = PIDOF_OMITSZ-1; oind > 0; oind--)
+ 		opid[oind] = 0;
+ 	opterr = 0;
+ 
+-	while ((opt = getopt(argc,argv,"hco:sx")) != EOF) switch (opt) {
++	while ((opt = getopt(argc,argv,"hcmo:sx")) != EOF) switch (opt) {
+ 		case '?':
+ 			nsyslog(LOG_ERR,"invalid options on command line!\n");
+ 			closelog();
+@@ -560,6 +595,9 @@ int main_pidof(int argc, char **argv)
+ 		case 'x':
+ 			scripts_too++;
+ 			break;
++		case 'm':
++			flags |= PIDOF_OMIT_OMIT_MATCHES;
++			break;
+ 		default:
+ 			/* Nothing */
+ 			break;
+@@ -578,20 +616,26 @@ int main_pidof(int argc, char **argv)
+ 	}
+ 
+ 	/* Print out process-ID's one by one. */
+-	readproc(DO_STAT);
++	readproc(DO_STAT, opid);
+ 	for(f = 0; f < argc; f++) {
+ 		if ((q = pidof(argv[f])) != NULL) {
+ 			spid = 0;
+ 			while ((p = get_next_from_pid_q(q))) {
+ 				if (flags & PIDOF_OMIT) {
+-					for (i = 0; i < oind; i++)
+-						if (opid[i] == p->pid)
++					PROC * optr;
++					for (optr = olist; optr; optr = optr->next) {
++						if (optr->pid == p->pid)
+ 							break;
++						if (flags & PIDOF_OMIT_OMIT_MATCHES)
++							if (matches(optr, p))
++								break;
++					}
++
+ 					/*
+ 					 *	On a match, continue with
+ 					 *	the for loop above.
+ 					 */
+-					if (i < oind)
++					if (optr)
+ 						continue;
+ 				}
+ 				if (flags & PIDOF_SINGLE) {
+@@ -633,7 +677,7 @@ int main(int argc, char **argv)
+ 	PROC		*p;
+ 	int		pid, sid = -1;
+ 	pid_t		opid[KILLALL_OMITSZ];
+-	int		i, oind, omit = 0;
++	int		i, omit = 0;
+ 	int		sig = SIGKILL;
+ 
+ 	/* return non-zero if no process was killed */
+@@ -704,7 +748,7 @@ int main(int argc, char **argv)
+ 	sent_sigstop = 1;
+ 
+ 	/* Read /proc filesystem */
+-	if (readproc(NO_STAT) < 0) {
++	if (readproc(NO_STAT, 0) < 0) {
+ 		kill(-1, SIGCONT);
+ 		return(1);
+ 	}

@@ -1,0 +1,71 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# chkconfig: 2345 01 99
+# Provides:          bootlogd
+# Required-Start:    mountdevsubfs
+# X-Start-Before:    hostname keymap keyboard-setup procps pcmcia hwclock hwclockfirst hdparm hibernate-cleanup lvm2
+# Required-Stop:
+# Default-Start:     S
+# Default-Stop:
+# Short-Description: Start or stop bootlogd.
+# Description:       Starts or stops the bootlogd log program
+#                    which logs boot messages.
+### END INIT INFO
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+PATH=/sbin:/bin  # No remote fs at start
+DAEMON=/sbin/bootlogd
+[ -x "$DAEMON" ] || exit 0
+NAME=bootlogd
+DESC="boot logger"
+BOOTLOGD_OPTS="-r -c"
+[ -r /etc/sysconfig/bootlogd ] && . /etc/sysconfig/bootlogd
+
+# Because bootlogd is broken on some systems, we take the special measure
+# of requiring it to be enabled by setting an environment variable.
+case "$BOOTLOGD_ENABLE" in
+  [Nn]*)
+	exit 0
+	;;
+esac
+
+case "$1" in
+  start)
+  	# PATH is set above
+	gprintf "Starting $DESC $NAME"
+	if [ -d /proc/1/. ]
+	then
+		umask 027
+		daemon $DAEMON $BOOTLOGD_OPTS
+		ret=$?
+	else
+		$DAEMON $BOOTLOGD_OPTS
+		ret=$?
+	fi
+	echo 
+	;;
+  stop)
+	PATH=/bin:/sbin:/usr/bin:/usr/sbin
+	gprintf "Stopping $DESC" "$NAME"
+	killproc bootlogd
+	ret=$?
+	sleep 1
+	echo
+	;;
+  restart|force-reload)
+ 	$0 stop
+ 	$0 start
+        ret=$?
+	;;
+  status)
+	status bootlogd && exit 0 || exit $?
+	;;
+  *)
+	gprintf "Usage: bootlogd {start|stop|restart|force-reload|status}" >&2
+	exit 3
+	;;
+esac
+exit $ret
+

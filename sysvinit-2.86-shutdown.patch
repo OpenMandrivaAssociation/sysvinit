@@ -1,0 +1,35 @@
+--- sysvinit-2.86/src/shutdown.c.shutdown	2005-06-27 08:57:31.000000000 +0200
++++ sysvinit-2.86/src/shutdown.c	2005-06-27 08:58:25.000000000 +0200
+@@ -15,6 +15,11 @@
+  *
+  * Version:	@(#)shutdown  2.86-1  31-Jul-2004  miquels@cistron.nl
+  *
++ * Contributor :
++ * 		2000-01-03 Yoann Vandoorselaere
++ *			- Take care of the -a options even if shutdown.allow doesn't exist
++ *
++ *
+  *		This file is part of the sysvinit suite,
+  *		Copyright 1991-2004 Miquel van Smoorenburg.
+  *
+@@ -454,7 +459,9 @@
+ 	int			useacl = 0;
+ 	int			pid = 0;
+ 	int			user_ok = 0;
+-
++	
++	downusers[0] = 0;
++	
+ 	/* We can be installed setuid root (executable for a special group) */
+ 	realuid = getuid();
+ 	setuid(geteuid());
+@@ -523,7 +530,8 @@
+ 	}
+ 
+ 	/* Do we need to use the shutdown.allow file ? */
+-	if (useacl && (fp = fopen(SDALLOW, "r")) != NULL) {
++	if (useacl)
++	  if ((fp = fopen(SDALLOW, "r")) != NULL) {
+ 
+ 		/* Read /etc/shutdown.allow. */
+ 		i = 0;

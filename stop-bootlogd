@@ -1,0 +1,32 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# chkconfig: 2345 99 99
+# X-Mandriva-Compat-Mode
+# Provides:          stop-bootlogd
+# Required-Start:    $local_fs $all
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:
+# Short-Description: Stop bootlogd
+# Description:       See the init.d/bootlogd script
+### END INIT INFO
+
+NAME=stop-bootlogd
+DAEMON=/sbin/bootlogd
+
+[ -x "$DAEMON" ] || exit 0
+
+case "$1" in
+  start)
+	/etc/rc.d/init.d/bootlogd stop
+	;;
+  stop|restart|force-reload)
+	# No-op
+	;;
+  status)
+	exec /etc/init.d/bootlogd status
+	;;
+  *)
+	echo "Usage: $NAME {start|stop|restart|force-reload}" >&2
+	exit 3
+esac

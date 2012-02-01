@@ -1,0 +1,26 @@
+diff -Naurp sysvinit-2.86/man/init.8 sysvinit-2.86.oden/man/init.8
+--- sysvinit-2.86/man/init.8	2008-12-22 16:30:58.000000000 +0100
++++ sysvinit-2.86.oden/man/init.8	2008-12-22 16:31:16.000000000 +0100
+@@ -258,7 +258,7 @@ terminal line.
+ .\"{{{  Diagnostics
+ .SH DIAGNOSTICS
+ If \fBinit\fP finds that it is continuously respawning an entry
+-more than 10 times in 2 minutes, it will assume that there is an error
++more than 3 times in 20 seconds, it will assume that there is an error
+ in the command string, generate an error message on the system console,
+ and refuse to respawn this entry until either 5 minutes has elapsed or
+ it receives a signal.  This prevents it from eating up system resources
+diff -Naurp sysvinit-2.86/src/init.h sysvinit-2.86.oden/src/init.h
+--- sysvinit-2.86/src/init.h	2004-07-29 13:21:01.000000000 +0200
++++ sysvinit-2.86.oden/src/init.h	2008-12-22 16:31:16.000000000 +0100
+@@ -19,8 +19,8 @@
+ #define STATE_PIPE 11			/* used to pass state through exec */
+ 
+ /* Failsafe configuration */
+-#define MAXSPAWN   10			/* Max times respawned in.. */
+-#define TESTTIME   120			/* this much seconds */
++#define MAXSPAWN   3			/* Max times respawned in.. */
++#define TESTTIME   20			/* this much seconds */
+ #define SLEEPTIME  300			/* Disable time */
+ 
+ /* Default path inherited by every child. */

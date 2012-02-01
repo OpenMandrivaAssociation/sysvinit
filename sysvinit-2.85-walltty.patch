@@ -1,0 +1,11 @@
+--- ./src/dowall.c.wall	2003-04-17 13:32:01.000000000 +0200
++++ ./src/dowall.c	2003-07-01 15:44:14.000000000 +0200
+@@ -189,7 +189,7 @@
+ 			alarm(2);
+ 			flags = O_WRONLY|O_NDELAY|O_NOCTTY;
+ 			if (file_isatty(term) &&
+-			    (fd = open(term, flags)) >= 0) {
++				(fd = open(term, flags)) >= 0 && isatty(fd)) {
+ 				if (isatty(fd) &&
+ 				    (tp = fdopen(fd, "w")) != NULL) {
+ 					fputs(line, tp);
