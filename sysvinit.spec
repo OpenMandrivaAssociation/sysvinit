@@ -3,13 +3,12 @@
 Summary: Programs which control basic system processes
 Name: sysvinit
 Version: 2.87
-Release: %mkrel 11
+Release: %mkrel 10
 License: GPLv2+
 Group: System/Configuration/Boot and Init
 Source: https://alioth.debian.org/frs/download.php/3060/sysvinit-%{version}.tar.gz
 Source1: bootlogd
 Source2: stop-bootlogd
-Source3: 88-clock.rules
 URL: https://alioth.debian.org/projects/pkg-sysvinit/
 Patch1: sysvinit-2.78-man.patch
 Patch4: sysvinit-2.86-autofsck.patch
@@ -136,9 +135,6 @@ EOF
 # Remove unpackaged file(s)
 rm -rf	%{buildroot}/usr/include
 
-# Add udev clock rule copied from initscripts
-install -D -m644 %{SOURCE3} %{buildroot}/lib/udev/rules.d/88-clock.rules
-
 %post
 %_post_service bootlogd
 %_post_service stop-bootlogd
@@ -178,8 +174,6 @@ rm -rf %{buildroot}
 %{_mandir}/man8/bootlogd*
 %ghost /dev/initctl
 
-/lib/udev/rules.d/88-clock.rules
-
 %{_sysconfdir}/rc.d/init.d/*bootlogd
 %config(noreplace) %{_sysconfdir}/sysconfig/bootlogd
 
@@ -203,11 +197,7 @@ rm -rf %{buildroot}
 
 
 %changelog
-* Wed Aug 24 2011 Wiliam Alves de Souza <wiliam@mandriva.com> 2.87-11mdv2011.0
-+ Revision: 696532
-- Added udev clock rule copied from initscripts
-
-* Sun May 15 2011 Oden Eriksson <oeriksson@mandriva.com> 2.87-10
+* Sun May 15 2011 Oden Eriksson <oeriksson@mandriva.com> 2.87-10mdv2011.0
 + Revision: 674748
 - fix build (ubuntu)
 - mass rebuild
@@ -271,7 +261,7 @@ rm -rf %{buildroot}
 + Revision: 317611
 - rediffed some fuzzy patches
 
-* Wed Jul 23 2008 Olivier Blin <blino@mandriva.org> 2.86-8mdv2009.0
+* Wed Jul 23 2008 Olivier Blin <oblin@mandriva.com> 2.86-8mdv2009.0
 + Revision: 242989
 - add more killall5 features (from Debian):
   o never attempt to kill init
@@ -282,7 +272,7 @@ rm -rf %{buildroot}
 + Revision: 225597
 - rebuild
 
-* Mon Jan 28 2008 Olivier Blin <blino@mandriva.org> 2.86-6mdv2008.1
+* Mon Jan 28 2008 Olivier Blin <oblin@mandriva.com> 2.86-6mdv2008.1
 + Revision: 159196
 - require coreutils for post script (#19143)
 - obsoletes/provides SysVinit
@@ -300,7 +290,7 @@ rm -rf %{buildroot}
 + Revision: 128170
 - kill re-definition of %%buildroot on Pixel's request
 
-  + Olivier Blin <blino@mandriva.org>
+  + Olivier Blin <oblin@mandriva.com>
     - restore previous SysVinit package
 
 
