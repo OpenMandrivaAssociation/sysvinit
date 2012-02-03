@@ -3,7 +3,7 @@
 Summary: Programs which control basic system processes
 Name: sysvinit
 Version: 2.87
-Release: %mkrel 11
+Release: %mkrel 12
 License: GPLv2+
 Group: System/Configuration/Boot and Init
 Source: https://alioth.debian.org/frs/download.php/3060/sysvinit-%{version}.tar.gz
