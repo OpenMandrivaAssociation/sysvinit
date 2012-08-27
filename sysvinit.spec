@@ -4,7 +4,7 @@
 Summary: Programs which control basic system processes
 Name: sysvinit
 Version: 2.87
-Release: 12
+Release: 13
 License: GPLv2+
 Group: System/Configuration/Boot and Init
 Source: https://alioth.debian.org/frs/download.php/3060/sysvinit-%{version}.tar.gz
@@ -198,6 +198,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Sun Aug 26 2012 Tomasz Pawel Gajc <tpg@mandriva.org> 2.87-13
++ Revision: 815792
+- reupload
+
 * Fri Aug 24 2012 Paulo Andrade <pcpa@mandriva.com.br> 2.87-12
 + Revision: 815705
 - Bump release and rebuild.
@@ -303,4 +307,12 @@ rm -rf %{buildroot}
 
   + Olivier Blin <blino@mandriva.org>
     - restore previous SysVinit package
+
+
+* Sat Sep 15 2007 Tomasz Pawel Gajc <tpg@mandriva.org> 2.86-6mdv2008.0
++ Revision: 85860
+- sync patches with fedora (104-113)
+- spec file clean
+- soec file clean
+- rename to be closer with upstream
 
