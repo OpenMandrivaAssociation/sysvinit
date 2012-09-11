@@ -1,15 +1,15 @@
 %define enable_bootlogd_service 0
+%define _disable_ld_no_undefined 1
 
 Summary: Programs which control basic system processes
 Name: sysvinit
 Version: 2.87
-Release: %mkrel 15
+Release: 16
 License: GPLv2+
 Group: System/Configuration/Boot and Init
 Source: https://alioth.debian.org/frs/download.php/3060/sysvinit-%{version}.tar.gz
 Source1: bootlogd
 Source2: stop-bootlogd
-Source3: 88-clock.rules
 URL: https://alioth.debian.org/projects/pkg-sysvinit/
 Patch1: sysvinit-2.78-man.patch
 Patch4: sysvinit-2.86-autofsck.patch
@@ -24,10 +24,10 @@ Patch25: sysvinit-2.87-wide.patch
 Patch26: sysvinit-2.87-ipv6.patch
 # Add -m option to pidof to omit processes that match existing omitted pids (#632321)
 Patch27: sysvinit-2.87-omit.patch
+Patch28: sysvinit-2.87-crypt-lib.patch
 
 # Mandriva patches
 Patch100: sysvinit-2.86-shutdown.patch
-Patch101: sysvinit-2.87-libcrypt.patch
 Patch104: sysvinit-2.85-walltty.patch
 Patch105: sysvinit-disable-respawn-more-quickly.patch
 # do not try to take over console tty for rc.sysinit, it conflicts with speedboot (Mdv bug #58488)
@@ -44,7 +44,6 @@ Requires(post): coreutils
 Requires: sysvinit-tools = %{version}-%{release}
 Obsoletes: SysVinit < 2.86-6mdv2008.1
 Provides: SysVinit = %{version}-%{release}
-Buildroot: %{_tmppath}/%{name}-%{version}-buildroot
 
 %description
 The sysvinit package contains a group of processes that control
@@ -91,9 +90,9 @@ management.
 %patch26 -p1 -b .ipv6
 # Support -m option for pidof (#632321)
 %patch27 -p1 -b .omit
+%patch28 -p1 -b .crypt_lib~
 
 %patch100 -p1 -b .shutdown
-%patch101 -p1 -b .libcrypt
 %patch104 -p1 -b .wall
 %patch105 -p1 -b .disable-respawn-more-quickly
 %patch106 -p1 -b .speedboot-ioctl
@@ -104,7 +103,7 @@ management.
 %patch203 -p1 -b .define_enoioctlcmd
 
 %build
-%make CFLAGS="%{optflags} -D_GNU_SOURCE" LDFLAGS="%{ldflags}" -C src
+%make CFLAGS="%{optflags} -D_GNU_SOURCE" LDFLAGS="%{ldflags}" LCRYPT="-lcrypt" -C src
 
 %install
 rm -rf %{buildroot}
@@ -136,8 +135,9 @@ EOF
 # Remove unpackaged file(s)
 rm -rf	%{buildroot}/usr/include
 
-# Add udev clock rule copied from initscripts
-install -D -m644 %{SOURCE3} %{buildroot}/lib/udev/rules.d/88-clock.rules
+# Remove sulogin and utmpdump, they're part of util-linux these days
+rm %buildroot/sbin/sulogin %buildroot%_mandir/man8/sulogin*
+rm %buildroot%_bindir/utmpdump
 
 %post
 %_post_service bootlogd
@@ -178,8 +178,6 @@ rm -rf %{buildroot}
 %{_mandir}/man8/bootlogd*
 %ghost /dev/initctl
 
-/lib/udev/rules.d/88-clock.rules
-
 %{_sysconfdir}/rc.d/init.d/*bootlogd
 %config(noreplace) %{_sysconfdir}/sysconfig/bootlogd
 
@@ -191,21 +189,28 @@ rm -rf %{buildroot}
 %{_bindir}/last
 %{_bindir}/lastb
 %{_bindir}/mesg
-%{_bindir}/utmpdump
 %attr(2555,root,tty)  /usr/bin/wall
 /sbin/pidof
 /sbin/killall5
-/sbin/sulogin
 %{_mandir}/man1/*
 %{_mandir}/man8/killall5*
 %{_mandir}/man8/pidof*
-%{_mandir}/man8/sulogin*
 
 
 %changelog
-* Wed Aug 24 2011 Wiliam Alves de Souza <wiliam@mandriva.com> 2.87-11mdv2011.0
-+ Revision: 696532
-- Added udev clock rule copied from initscripts
+* Sun Aug 26 2012 Tomasz Pawel Gajc <tpg@mandriva.org> 2.87-13
++ Revision: 815792
+- reupload
+
+* Fri Aug 24 2012 Paulo Andrade <pcpa@mandriva.com.br> 2.87-12
++ Revision: 815705
+- Bump release and rebuild.
+
+  + Per Øyvind Karlsen <peroyvind@mandriva.org>
+    - fix linking against libcrypt
+
+  + Bernhard Rosenkraenzer <bero@bero.eu>
+    - Remove sulogin and utmpdump, they're part of util-linux now
 
 * Sun May 15 2011 Oden Eriksson <oeriksson@mandriva.com> 2.87-10
 + Revision: 674748
