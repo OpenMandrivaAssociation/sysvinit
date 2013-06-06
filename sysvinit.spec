@@ -1,49 +1,49 @@
 %define enable_bootlogd_service 0
 %define _disable_ld_no_undefined 1
 
-Summary: Programs which control basic system processes
-Name: sysvinit
-Version: 2.87
-Release: 16
-License: GPLv2+
-Group: System/Configuration/Boot and Init
-Source: https://alioth.debian.org/frs/download.php/3060/sysvinit-%{version}.tar.gz
-Source1: bootlogd
-Source2: stop-bootlogd
-URL: https://alioth.debian.org/projects/pkg-sysvinit/
-Patch1: sysvinit-2.78-man.patch
-Patch4: sysvinit-2.86-autofsck.patch
-Patch5: sysvinit-2.86-loginshell.patch
-Patch8: sysvinit-2.86-inittab.patch
-Patch10: sysvinit-2.87-pidof.patch
-Patch13: sysvinit-2.86-single.patch
-Patch16: sysvinit-2.86-quiet.patch
-Patch23: sysvinit-2.86-pidof-man.patch
-Patch24: sysvinit-2.87-sulogin.patch
-Patch25: sysvinit-2.87-wide.patch
-Patch26: sysvinit-2.87-ipv6.patch
+Summary:	Programs which control basic system processes
+Name:		sysvinit
+Version:	2.87
+Release:	17
+License:	GPLv2+
+Group:		System/Configuration/Boot and Init
+Source0:	https://alioth.debian.org/frs/download.php/3060/sysvinit-%{version}.tar.gz
+Source1:	bootlogd
+Source2:	stop-bootlogd
+URL:		https://alioth.debian.org/projects/pkg-sysvinit/
+Patch1:		sysvinit-2.78-man.patch
+Patch4:		sysvinit-2.86-autofsck.patch
+Patch5:		sysvinit-2.86-loginshell.patch
+Patch8:		sysvinit-2.86-inittab.patch
+Patch10:	sysvinit-2.87-pidof.patch
+Patch13:	sysvinit-2.86-single.patch
+Patch16:	sysvinit-2.86-quiet.patch
+Patch23:	sysvinit-2.86-pidof-man.patch
+Patch24:	sysvinit-2.87-sulogin.patch
+Patch25:	sysvinit-2.87-wide.patch
+Patch26:	sysvinit-2.87-ipv6.patch
 # Add -m option to pidof to omit processes that match existing omitted pids (#632321)
-Patch27: sysvinit-2.87-omit.patch
-Patch28: sysvinit-2.87-crypt-lib.patch
+Patch27:	sysvinit-2.87-omit.patch
+Patch28:	sysvinit-2.87-crypt-lib.patch
 
 # Mandriva patches
-Patch100: sysvinit-2.86-shutdown.patch
-Patch104: sysvinit-2.85-walltty.patch
-Patch105: sysvinit-disable-respawn-more-quickly.patch
+Patch100:	sysvinit-2.86-shutdown.patch
+Patch104:	sysvinit-2.85-walltty.patch
+Patch105:	sysvinit-disable-respawn-more-quickly.patch
 # do not try to take over console tty for rc.sysinit, it conflicts with speedboot (Mdv bug #58488)
-Patch106: sysvinit-2.87-speedboot-ioctl.patch
+Patch106:	sysvinit-2.87-speedboot-ioctl.patch
 
 # Debian patches
-Patch200: 50_bootlogd_devsubdir.patch
-Patch201: 54_bootlogd_findptyfail.patch
-Patch202: 55_bootlogd_flush.patch
-Patch203: 99_ftbfs_define_enoioctlcmd.patch
-BuildRequires: glibc-static-devel
-Requires: pam >= 0.66-5
-Requires(post): coreutils
-Requires: sysvinit-tools = %{version}-%{release}
-Obsoletes: SysVinit < 2.86-6mdv2008.1
-Provides: SysVinit = %{version}-%{release}
+Patch200:	50_bootlogd_devsubdir.patch
+Patch201:	54_bootlogd_findptyfail.patch
+Patch202:	55_bootlogd_flush.patch
+Patch203:	99_ftbfs_define_enoioctlcmd.patch
+BuildRequires:	glibc-static-devel
+Requires:	pam >= 0.66-5
+Requires(post):	coreutils
+Requires:	sysvinit-tools = %{version}-%{release}
+Obsoletes:	SysVinit < 2.86-6mdv2008.1
+Provides:	SysVinit = %{version}-%{release}
 
 %description
 The sysvinit package contains a group of processes that control
@@ -53,9 +53,9 @@ system boots. Init then controls the startup, running, and shutdown
 of all other programs.
 
 %package tools
-Summary: Tools used for process and utmp management
-Group: System/Configuration/Boot and Init
-Conflicts: sysvinit < 2.87-2mdv
+Summary:	Tools used for process and utmp management
+Group:		System/Configuration/Boot and Init
+Conflicts:	sysvinit < 2.87-2mdv
 
 %description tools
 The sysvinit-tools package contains various tools used for process
@@ -106,7 +106,6 @@ management.
 %make CFLAGS="%{optflags} -D_GNU_SOURCE" LDFLAGS="%{ldflags}" LCRYPT="-lcrypt" -C src
 
 %install
-rm -rf %{buildroot}
 for I in bin sbin usr/{bin,include} %{_mandir}/man{1,3,5,8} etc var/run dev; do
 	mkdir -p %{buildroot}/$I
 done
@@ -151,9 +150,6 @@ exit 0
 %preun
 %_preun_service bootlogd
 %_preun_service stop-bootlogd
-
-%clean
-rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
