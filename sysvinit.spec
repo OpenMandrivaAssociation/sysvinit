@@ -44,6 +44,7 @@ Requires(post):	coreutils
 Requires:	sysvinit-tools = %{version}-%{release}
 Obsoletes:	SysVinit < 2.86-6mdv2008.1
 Provides:	SysVinit = %{version}-%{release}
+Conflicts:	util-linux < 2.23.1
 
 %description
 The sysvinit package contains a group of processes that control
@@ -135,8 +136,11 @@ EOF
 rm -rf	%{buildroot}/usr/include
 
 # Remove sulogin and utmpdump, they're part of util-linux these days
-rm %buildroot/sbin/sulogin %buildroot%_mandir/man8/sulogin*
-rm %buildroot%_bindir/utmpdump
+rm %{buildroot}/sbin/sulogin %{buildroot}%{_mandir}/man8/sulogin*
+rm %{buildroot}%{_bindir}/utmpdump
+# (tpg) in util-linux-2.23
+rm %{buildroot}/bin/mountpoint
+rm %{buildroot}%{_bindir}/wall
 
 %post
 %_post_service bootlogd
@@ -180,12 +184,10 @@ exit 0
 %files tools
 %defattr(-,root,root)
 %doc doc/Changelog COPYRIGHT
-/bin/mountpoint
 /bin/pidof
 %{_bindir}/last
 %{_bindir}/lastb
 %{_bindir}/mesg
-%attr(2555,root,tty)  /usr/bin/wall
 /sbin/pidof
 /sbin/killall5
 %{_mandir}/man1/*
