@@ -135,6 +135,28 @@ EOF
 # Remove unpackaged file(s)
 rm -rf	%{buildroot}/usr/include
 
+# (tpg) kill these in the name of systemd
+
+rm %{buildroot}/sbin/bootlogd
+rm %{buildroot}/sbin/halt
+rm %{buildroot}/sbin/init
+rm %{buildroot}/sbin/poweroff
+rm %{buildroot}/sbin/reboot
+rm %{buildroot}/sbin/runlevel
+rm %{buildroot}/sbin/shutdown
+rm %{buildroot}/sbin/telinit
+rm %{buildroot}%{_sysconfdir}/rc.d/init.d/*bootlogd
+rm %{buildroot}%{_sysconfdir}/sysconfig/bootlogd
+rm %{buildroot}%{_mandir}/man5/*
+rm %{buildroot}%{_mandir}/man8/halt*
+rm %{buildroot}%{_mandir}/man8/init*
+rm %{buildroot}%{_mandir}/man8/poweroff*
+rm %{buildroot}%{_mandir}/man8/reboot*
+rm %{buildroot}%{_mandir}/man8/runlevel*
+rm %{buildroot}%{_mandir}/man8/shutdown*
+rm %{buildroot}%{_mandir}/man8/telinit*
+rm %{buildroot}%{_mandir}/man8/bootlogd*
+
 # Remove sulogin and utmpdump, they're part of util-linux these days
 rm %{buildroot}/sbin/sulogin %{buildroot}%{_mandir}/man8/sulogin*
 rm %{buildroot}%{_bindir}/utmpdump
@@ -142,44 +164,6 @@ rm %{buildroot}%{_bindir}/utmpdump
 rm %{buildroot}/bin/mountpoint
 rm %{buildroot}%{_bindir}/wall
 
-%post
-%_post_service bootlogd
-%_post_service stop-bootlogd
-
-[ ! -p /dev/initctl ] && rm -f /dev/initctl && mknod --mode=0600 /dev/initctl p || :
-[ -e /var/run/initrunlvl ] && ln -s ../var/run/initrunlvl /etc/initrunlvl || :
-[ -x /sbin/telinit -a -p /dev/initctl -a -f /proc/1/exe -a -d /proc/1/root ] && /sbin/telinit u || :
-exit 0
-
-%preun
-%_preun_service bootlogd
-%_preun_service stop-bootlogd
-
-%files
-%defattr(-,root,root)
-%doc doc/Propaganda doc/Install
-%doc doc/sysvinit-*.lsm contrib/start-stop-daemon.* 
-/sbin/bootlogd
-/sbin/halt
-/sbin/init
-/sbin/poweroff
-/sbin/reboot
-/sbin/runlevel
-/sbin/shutdown
-/sbin/telinit
-%{_mandir}/man5/*
-%{_mandir}/man8/halt*
-%{_mandir}/man8/init*
-%{_mandir}/man8/poweroff*
-%{_mandir}/man8/reboot*
-%{_mandir}/man8/runlevel*
-%{_mandir}/man8/shutdown*
-%{_mandir}/man8/telinit*
-%{_mandir}/man8/bootlogd*
-%ghost /dev/initctl
-
-%{_sysconfdir}/rc.d/init.d/*bootlogd
-%config(noreplace) %{_sysconfdir}/sysconfig/bootlogd
 
 %files tools
 %defattr(-,root,root)
