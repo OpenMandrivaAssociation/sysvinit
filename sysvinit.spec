@@ -156,6 +156,8 @@ rm %{buildroot}%{_mandir}/man8/runlevel*
 rm %{buildroot}%{_mandir}/man8/shutdown*
 rm %{buildroot}%{_mandir}/man8/telinit*
 rm %{buildroot}%{_mandir}/man8/bootlogd*
+rm %{buildroot}%{_mandir}/man1/mountpoint*
+rm %{buildroot}%{_mandir}/man1/wall*
 
 # Remove sulogin and utmpdump, they're part of util-linux these days
 rm %{buildroot}/sbin/sulogin %{buildroot}%{_mandir}/man8/sulogin*
