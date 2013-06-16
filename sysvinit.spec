@@ -104,6 +104,7 @@ management.
 %patch203 -p1 -b .define_enoioctlcmd
 
 %build
+%global optflags %{optflags} -Os
 %make CFLAGS="%{optflags} -D_GNU_SOURCE" LDFLAGS="%{ldflags}" LCRYPT="-lcrypt" -C src
 
 %install
