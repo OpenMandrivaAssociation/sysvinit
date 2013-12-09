@@ -142,8 +142,8 @@ rm %{buildroot}/sbin/bootlogd
 rm %{buildroot}/sbin/halt
 rm %{buildroot}/sbin/init
 rm %{buildroot}/sbin/poweroff
-rm %{buildroot}/sbin/last
-rm %{buildroot}/sbin/mesg
+rm %{buildroot}%{_bindir}/last
+rm %{buildroot}%{_sbindir}/mesg
 rm %{buildroot}/sbin/reboot
 rm %{buildroot}/sbin/runlevel
 rm %{buildroot}/sbin/shutdown
