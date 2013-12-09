@@ -4,7 +4,7 @@
 Summary:	Programs which control basic system processes
 Name:		sysvinit
 Version:	2.87
-Release:	21
+Release:	22
 License:	GPLv2+
 Group:		System/Configuration/Boot and Init
 Source0:	https://alioth.debian.org/frs/download.php/3060/sysvinit-%{version}.tar.gz
@@ -44,7 +44,7 @@ Requires(post):	coreutils
 Requires:	sysvinit-tools = %{version}-%{release}
 Obsoletes:	SysVinit < 2.86-6mdv2008.1
 Provides:	SysVinit = %{version}-%{release}
-Conflicts:	util-linux < 2.23.1
+Conflicts:	util-linux =< 2.24
 
 %description
 The sysvinit package contains a group of processes that control
@@ -142,6 +142,8 @@ rm %{buildroot}/sbin/bootlogd
 rm %{buildroot}/sbin/halt
 rm %{buildroot}/sbin/init
 rm %{buildroot}/sbin/poweroff
+rm %{buildroot}/sbin/last
+rm %{buildroot}/sbin/mesg
 rm %{buildroot}/sbin/reboot
 rm %{buildroot}/sbin/runlevel
 rm %{buildroot}/sbin/shutdown
@@ -151,6 +153,8 @@ rm %{buildroot}%{_sysconfdir}/sysconfig/bootlogd
 rm %{buildroot}%{_mandir}/man5/*
 rm %{buildroot}%{_mandir}/man8/halt*
 rm %{buildroot}%{_mandir}/man8/init*
+rm %{buildroot}%{_mandir}/man1/last.*
+rm %{buildroot}%{_mandir}/man1/mesg.*
 rm %{buildroot}%{_mandir}/man8/poweroff*
 rm %{buildroot}%{_mandir}/man8/reboot*
 rm %{buildroot}%{_mandir}/man8/runlevel*
@@ -172,132 +176,9 @@ rm %{buildroot}%{_bindir}/wall
 %defattr(-,root,root)
 %doc doc/Changelog COPYRIGHT
 /bin/pidof
-%{_bindir}/last
 %{_bindir}/lastb
-%{_bindir}/mesg
 /sbin/pidof
 /sbin/killall5
 %{_mandir}/man1/*
 %{_mandir}/man8/killall5*
 %{_mandir}/man8/pidof*
-
-
-%changelog
-* Sun Aug 26 2012 Tomasz Pawel Gajc <tpg@mandriva.org> 2.87-13
-+ Revision: 815792
-- reupload
-
-* Fri Aug 24 2012 Paulo Andrade <pcpa@mandriva.com.br> 2.87-12
-+ Revision: 815705
-- Bump release and rebuild.
-
-  + Per Øyvind Karlsen <peroyvind@mandriva.org>
-    - fix linking against libcrypt
-
-  + Bernhard Rosenkraenzer <bero@bero.eu>
-    - Remove sulogin and utmpdump, they're part of util-linux now
-
-* Sun May 15 2011 Oden Eriksson <oeriksson@mandriva.com> 2.87-10
-+ Revision: 674748
-- fix build (ubuntu)
-- mass rebuild
-
-* Thu Jan 27 2011 Eugeni Dodonov <eugeni@mandriva.com> 2.87-9
-+ Revision: 633185
-- Rebuild
-- Fix typo in service name.
-
-* Sun Nov 28 2010 Andrey Borzenkov <arvidjaar@mandriva.org> 2.87-8mdv2011.0
-+ Revision: 602209
-- P27: actually add backported patch
-
-* Sat Nov 27 2010 Andrey Borzenkov <arvidjaar@mandriva.org> 2.87-7mdv2011.0
-+ Revision: 601936
-- P27: add pidof -m option for new initscripts
-
-* Wed May 05 2010 Frederic Crozat <fcrozat@mandriva.com> 2.87-6mdv2010.1
-+ Revision: 542413
-- Patch106: do not try to take over console tty for rc.sysinit, it conflicts with speedboot (Mdv bug #58488)
-
-* Tue May 04 2010 Frederic Crozat <fcrozat@mandriva.com> 2.87-5mdv2010.1
-+ Revision: 542055
-- Patch200 (Debian): fix tty search with udev
-- Patch201 (Debian): ensure findpty returns error correctly
-- Patch202 (Debian): flush cache on disk if needed
-- Add initscripts for bootlogd (not enabled by default)
-
-* Thu Apr 29 2010 Frederic Crozat <fcrozat@mandriva.com> 2.87-4mdv2010.1
-+ Revision: 540863
-- Patch24 (Fedora): get_default_context_with_level returns 0 on success (Fedora bug #568530)
-- Patch25 (Fedora): Add wide output names with -w (Fedora bug #550333)
-- Patch26 (Fedora): Change accepted ipv6 addresses (Fedora bug #573346)
-- do not strip package at build time, ensure debug package isn't empty (Fedora)
-
-* Mon Mar 15 2010 Oden Eriksson <oeriksson@mandriva.com> 2.87-3mdv2010.1
-+ Revision: 520249
-- rebuilt for 2010.1
-
-* Wed Sep 09 2009 Frederic Crozat <fcrozat@mandriva.com> 2.87-2mdv2010.0
-+ Revision: 435821
-- Move non init related utilities to tools subpackage (Fedora)
-
-* Wed Aug 12 2009 Frederic Crozat <fcrozat@mandriva.com> 2.87-1mdv2010.0
-+ Revision: 415602
-- Release 2.87dsf
-- Remove a lot of patches merged upstream and sync with fedora patches
-
-* Thu Jan 29 2009 Frederic Crozat <fcrozat@mandriva.com> 2.86-11mdv2009.1
-+ Revision: 335131
-- Patch21 (Fedora): Don't abort if policy is already loaded
-- Patch22 (Fedora):  Document some of the behavior of pidof. (Fedora bug #201317)
-- Patch24 (Fedora): Don't pass around unchecked malloc (and avoid a leak) (Fedora bug #473485)
-
-* Sun Jan 25 2009 Tomasz Pawel Gajc <tpg@mandriva.org> 2.86-10mdv2009.1
-+ Revision: 333578
-- compile with %%ldflags
-- spec file clean
-
-* Mon Dec 22 2008 Oden Eriksson <oeriksson@mandriva.com> 2.86-9mdv2009.1
-+ Revision: 317611
-- rediffed some fuzzy patches
-
-* Wed Jul 23 2008 Olivier Blin <blino@mandriva.org> 2.86-8mdv2009.0
-+ Revision: 242989
-- add more killall5 features (from Debian):
-  o never attempt to kill init
-  o exit with a proper code
-  o "-o" option support to omit pids (to be used by splashy)
-
-* Wed Jun 18 2008 Thierry Vignaud <tv@mandriva.org> 2.86-7mdv2009.0
-+ Revision: 225597
-- rebuild
-
-* Mon Jan 28 2008 Olivier Blin <blino@mandriva.org> 2.86-6mdv2008.1
-+ Revision: 159196
-- require coreutils for post script (#19143)
-- obsoletes/provides SysVinit
-- rename as sysvinit
-- rename SysVinit as sysvinit
-- update license tag to GPLv2+
-- update URL
-- sync with Fedora patches
-- remove old cpp hack
-- use Fedora's version of timeval/varargs patches
-- use Fedora's version of autofsck/chroot patches
-- restore BuildRoot
-
-* Mon Dec 17 2007 Thierry Vignaud <tv@mandriva.org> 2.86-5mdv2008.1
-+ Revision: 128170
-- kill re-definition of %%buildroot on Pixel's request
-
-  + Olivier Blin <blino@mandriva.org>
-    - restore previous SysVinit package
-
-
-* Sat Sep 15 2007 Tomasz Pawel Gajc <tpg@mandriva.org> 2.86-6mdv2008.0
-+ Revision: 85860
-- sync patches with fedora (104-113)
-- spec file clean
-- soec file clean
-- rename to be closer with upstream
-
