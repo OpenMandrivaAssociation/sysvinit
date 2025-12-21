@@ -38,6 +38,7 @@ Patch200:	50_bootlogd_devsubdir.patch
 Patch201:	54_bootlogd_findptyfail.patch
 Patch202:	55_bootlogd_flush.patch
 Patch203:	99_ftbfs_define_enoioctlcmd.patch
+BuildRequires:	make
 BuildRequires:	glibc-static-devel
 Requires:	pam >= 0.66-5
 Requires(post):	coreutils
